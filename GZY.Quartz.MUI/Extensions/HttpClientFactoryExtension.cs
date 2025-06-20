@@ -10,7 +10,7 @@ namespace GZY.Quartz.MUI.Extensions
 {
     public static class HttpClientFactoryExtension
     {
-        public static async Task<string> HttpSendAsync(this IHttpClientFactory httpClientFactory, 
+        public static async Task<(string,string)> HttpSendAsync(this IHttpClientFactory httpClientFactory, 
             HttpMethod method, 
             string url,
             string parmet, 
@@ -41,12 +41,13 @@ namespace GZY.Quartz.MUI.Extensions
 
                 var result = await httpResponseMessage.Content
                     .ReadAsStringAsync();
-                return result;
+                var stat = httpResponseMessage.StatusCode.ToString();
+                return (result, stat);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return ex.Message;
+                return (ex.Message,"ERROR");
             }
         }
     }

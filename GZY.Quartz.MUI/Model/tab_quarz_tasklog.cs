@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace GZY.Quartz.MUI.Model
@@ -15,10 +16,12 @@ namespace GZY.Quartz.MUI.Model
         /// 任务名
         /// </summary>
         [Description("任务名")]
+        [StringLength(maximumLength:200)]
         public string TaskName { get; set; }
         /// <summary>
         /// 分组名
         /// </summary>
+        [StringLength(maximumLength: 200)]
         [Description("分组名")]
         public string GroupName { get; set; }
         /// <summary>
@@ -38,5 +41,12 @@ namespace GZY.Quartz.MUI.Model
         /// </summary>
         [Description("任务执行结果")]
         public string Msg { get; set; }
+
+        /// <summary>
+        /// 任务状态
+        /// </summary>
+        [Description("状态")]
+        [StringLength(maximumLength: 100)]
+        public string State { get; set; } 
     }
 }

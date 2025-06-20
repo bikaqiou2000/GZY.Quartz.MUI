@@ -58,25 +58,4 @@
     <EmbeddedResource Remove="resources\**" />
     <None Remove="resources\**" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="8P%29KFD9L[JN90ZZIV]B2JRK.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="8P)KFD9L[JN90ZZIV]B2JRK.png">
-      <Pack>True</Pack>
-      <Content>
-        基于Quartz定时任务的UI管理界面
-        2.7
-        1.添加API类任务的超时时间,可以通过全局配置也可以单个任务设置
-        2.设置定时任务日志查看默认按开始时间倒序
-        3.添加是否显示控制台日志的全局配置
-        4.优化UI显示-固定操作栏和表头,方便任务较多的情况下操作
-        5.优化UI显示-执行记录消息添加支持br关键字进行换行查看
-      </Content>
-      <PackagePath>\</PackagePath>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-  </ItemGroup>
 </Project>

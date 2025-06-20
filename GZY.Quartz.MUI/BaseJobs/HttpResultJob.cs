@@ -40,6 +40,7 @@ namespace GZY.Quartz.MUI.BaseJobs
         {
             DateTime dateTime = DateTime.Now;
             string httpMessage = "";
+            string exeStat = "";
             AbstractTrigger trigger = (context as JobExecutionContextImpl).Trigger as AbstractTrigger;
 
             tab_quarz_task taskOptions = _quartzService.GetJobs(a => a.TaskName == trigger.Name && a.GroupName == trigger.Group).Result.FirstOrDefault();
@@ -80,7 +81,7 @@ namespace GZY.Quartz.MUI.BaseJobs
                     header.Add(taskOptions.ApiAuthKey.Trim(), taskOptions.ApiAuthValue.Trim());
                 }
 
-                httpMessage = await httpClientFactory.HttpSendAsync(
+                (httpMessage, exeStat) = await httpClientFactory.HttpSendAsync(
                     taskOptions.ApiRequestType?.ToLower() == "get" ? HttpMethod.Get : HttpMethod.Post,
                     taskOptions.ApiUrl,
                     taskOptions.ApiParameter,
@@ -89,6 +90,7 @@ namespace GZY.Quartz.MUI.BaseJobs
             catch (Exception ex)
             {
                 httpMessage = ex.Message;
+                exeStat = "ERROR";
             }
 
             try
@@ -96,6 +98,7 @@ namespace GZY.Quartz.MUI.BaseJobs
                 //string logContent = $"{(string.IsNullOrEmpty(httpMessage) ? "OK" : httpMessage)}\r\n";
                 tab_Quarz_Tasklog.EndDate = DateTime.Now;
                 tab_Quarz_Tasklog.Msg = httpMessage;
+                tab_Quarz_Tasklog.State = exeStat;
                 await _quartzLogService.AddLog(tab_Quarz_Tasklog);
             }
             catch (Exception)
