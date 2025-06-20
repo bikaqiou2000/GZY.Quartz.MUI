@@ -8,7 +8,7 @@ namespace GZY.Quartz.MUI.Config
 {
     public  class QuartzMUIOptions
     {
-        public  int DefaultApiTimeOut { get; set; } = 30;
+        public  int DefaultApiTimeOut { get; set; } = 300;
         public  bool ShowConsoleLog { get; set; } = true;
     }
 }

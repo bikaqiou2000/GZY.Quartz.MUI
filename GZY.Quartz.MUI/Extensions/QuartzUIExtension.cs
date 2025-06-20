@@ -44,6 +44,7 @@ namespace GZY.Quartz.MUI.Extensions
 
                 services.AddSingleton<DbContextOptions<QuarzEFContext>>(a => { return option; });
                 services.AddDbContext<QuarzEFContext>();
+                
                 services.AddScoped<IQuartzLogService, EFQuartzLogService>();
                 services.AddScoped<IQuartzService, EFQuartzService>();
 
