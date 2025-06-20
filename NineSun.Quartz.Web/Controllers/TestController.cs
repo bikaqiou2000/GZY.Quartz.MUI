@@ -1,9 +1,17 @@
+using System.Data;
 using Microsoft.AspNetCore.Mvc;
+using MySqlConnector;
+using NineSun.Quartz.Web.Domain.DB;
+using Dapper;
 
 namespace NineSun.Quartz.Web.Controllers
 {
+
+    /// <summary>
+    ///基本测试
+    /// </summary>
     [ApiController]
-    [Route("[controller]")]
+    [Route("[controller]/[action]")]
     public class TestController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
@@ -12,14 +20,20 @@ namespace NineSun.Quartz.Web.Controllers
         };
 
         private readonly ILogger<TestController> _logger;
+        private readonly DatabaseConn _conns ;
 
-        public TestController(ILogger<TestController> logger)
+        public TestController(ILogger<TestController> logger, DatabaseConn conns)
         {
             _logger = logger;
+            _conns = conns;
         }
 
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        /// <summary>
+        /// 天气
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public IEnumerable<WeatherForecast> GetWeatherForecast()
         {
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
@@ -28,6 +42,23 @@ namespace NineSun.Quartz.Web.Controllers
                 Summary = Summaries[Random.Shared.Next(Summaries.Length)]
             })
             .ToArray();
+        }
+
+        /// <summary>
+        /// 获取Mysql数据
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public IEnumerable<dynamic> GetMysqlData()
+        {
+            using (var conn = _conns.GetNineSunConn())
+            {
+                var sql = "select * from cod_dw ";
+                throw new ApplicationException("test error");
+                // var dt = conn.QueryTable(sql, null);
+                var dat = conn.Query(sql, null);
+                return dat;
+            }
         }
     }
 

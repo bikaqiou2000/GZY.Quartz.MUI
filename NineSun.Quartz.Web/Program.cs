@@ -3,6 +3,9 @@ using GZY.Quartz.MUI.EFContext;
 using GZY.Quartz.MUI.Extensions;
 using Microsoft.EntityFrameworkCore;
 using NineSun.Quartz.Web.Domain.Conf;
+using MySqlConnector;
+using NineSun.Quartz.Web.Domain;
+using NineSun.Quartz.Web.Domain.DB;
 
 namespace NineSun.Quartz.Web
 {
@@ -24,12 +27,15 @@ namespace NineSun.Quartz.Web
 
             var optionsBuilder = new DbContextOptionsBuilder<QuarzEFContext>();
             var serverVersion = new MySqlServerVersion(new Version(5, 5, 27));
-
             //quartz db
             var dbconfs = configuration.GetSection("DbConfig").Get<List<DbConfigItem>>();
+            
             //db
             optionsBuilder.UseMySql(dbconfs.First(x => x.Key == "quartz").ConnectionString, serverVersion);
             builder.Services.AddQuartzUI(optionsBuilder.Options);
+
+            builder.Services.AddSingleton(new DatabaseConn(dbconfs));  
+
 
             var app = builder.Build();
 

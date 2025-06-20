@@ -33,15 +33,19 @@
                               :default-sort="{prop: 'GroupName', order: 'ascending'}" :header-cell-style="{backgroundColor:'#F5F7FA',color:'#000000'}" @@current-change="handleSelect">
                         <el-table-column type="index" width="50" label="序号" align="center">
                         </el-table-column>
-                        <el-table-column prop="TaskName" label="任务" width="180" align="center">
+                        <el-table-column prop="TaskName" label="任务" width="180" align="center" sortable
+                                         :filters="taskNames"
+                                         :filter-method="filterTaskName">
                         </el-table-column>
-                        <el-table-column prop="GroupName" label="分组" width="180" align="center" sortable>
+                        <el-table-column prop="GroupName" label="分组" width="100" align="center" sortable  
+                                         :filters="groupNames"
+                                         :filter-method="filterGroupName">
                         </el-table-column>
                         <el-table-column prop="Interval" label="间隔时间" align="center">
                         </el-table-column>
                         <el-table-column prop="ApiUrl" label="ApiUrl" align="center">
                         </el-table-column>
-                        <el-table-column prop="Status" width="70" label="运行状态" align="center" sortable>
+                        <el-table-column prop="Status" width="100" label="状态" align="center" sortable>
                             <template slot-scope="scope">
                                 <el-tag type="info" disable-transitions v-if="scope.row.Status==4">
                                     {{scope.row.Status|formatStatues}}
@@ -57,11 +61,11 @@
                                 </el-tag>
                             </template>
                         </el-table-column>
-                        <el-table-column prop="LastRunTime" label="最近一次运行时间" align="center">
+                        <el-table-column prop="LastRunTime" label="最近运行" align="center">
                         </el-table-column>
-                        <el-table-column prop="Describe" label="任务描述" :show-overflow-tooltip="true" align="center">
+                        <el-table-column prop="Describe" label="描述" :show-overflow-tooltip="true" align="center">
                         </el-table-column>
-                        <el-table-column prop="TaskType" label="任务类型" width="120" align="center">
+                        <el-table-column prop="TaskType" label="类型" width="100" align="center">
                             <template slot-scope="scope">
                                 {{scope.row.TaskType==1?'DLL':'API'}}
                             </template>
@@ -76,7 +80,7 @@
             </el-row>
         </el-main>
     </el-container>
-    <el-dialog :title="title" :visible.sync="dialogFormVisible">
+    <el-dialog :title="title" :visible.sync="dialogFormVisible" :modal="true" >
         <el-row type="flex" justify="center">
             <el-col :span="23">
                 <el-form :model="ruleForm" ref="ruleForm" label-width="10em" class="demo-ruleForm">
@@ -170,7 +174,7 @@
             </el-col>
         </el-row>
     </el-dialog>
-    <el-dialog title="执行记录" :visible.sync="dialogRecordVisible">
+    <el-dialog :title="'执行记录'" :visible.sync="dialogRecordVisible" :modal="true">
         <el-row type="flex" align="middle">
             <el-col :span="24" style="padding: 10px 0 0 0;">
                 <el-table ref="tb_record" :data="recordData" border stripe style="width: 100%;" highlight-current-row
@@ -182,12 +186,33 @@
                     <el-table-column prop="EndDate" label="结束时间" width="180" align="center">
                     </el-table-column>
                     <el-table-column prop="Msg" label="消息" align="center">
+                        @*
                         <template slot-scope="scope">
-                            <el-tooltip placement="top">
-                                <div v-html="scope.row.Msg" slot="content"></div>
-                                <div style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis">{{scope.row.Msg}}</div>
-                             </el-tooltip>
+                           <el-tooltip placement="top">
+                               <div v-html="scope.row.Msg" slot="content">
+                               </div>
+                               <div style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis">
+                                   {{scope.row.Msg}}
+                               </div>
+                           </el-tooltip>
                         </template>
+                        *@
+                        <template slot-scope="scope">
+                            <el-popover
+                                placement="top-start"
+                                title="详情"
+                                width="1000"
+                                trigger="hover"
+                                >
+                                <div>
+                                  <el-input  type="textarea"  :rows="40"
+                                  :value="scope.row.Msg"
+                                  ></el-input>
+                                </div>
+                                <div slot="reference">{{scope.row.Msg.substring(0, 50) + '...'}}</div>
+                            </el-popover>
+                        </template>
+
                     </el-table-column>
                 </el-table>
             </el-col>
@@ -276,6 +301,18 @@
                
                 this.OnLoadJobs();
                 this.onLoadClassJobs();
+            },
+            computed: {
+              groupNames: function () {
+                 let dat = [...new Set(this.tableData.map(item => item.GroupName))]
+                 return  dat.map( x =>  { return  { "text": x, "value": x } })
+                   
+              },
+              taskNames: function () {
+                 let dat = [...new Set(this.tableData.map(item => item.TaskName))]
+                 return  dat.map( x =>  { return  { "text": x, "value": x } })
+
+              },
             },
             methods: {
                 FormatProgress(percentage) {
@@ -514,7 +551,13 @@
                         id: 0,
                         timeflag:''
                     }
-                }
+                },
+                filterGroupName(value, row) {
+                  return row.GroupName === value;
+                },
+                filterTaskName(value, row) {
+                  return row.TaskName === value;
+                },
             },
             filters: {
                 formatStatues(val) {
