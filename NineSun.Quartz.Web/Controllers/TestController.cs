@@ -11,7 +11,7 @@ namespace NineSun.Quartz.Web.Controllers
     ///基本测试
     /// </summary>
     [ApiController]
-    [Route("[controller]/[action]")]
+    [Route("api/[controller]/[action]")]
     public class TestController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
@@ -57,6 +57,24 @@ namespace NineSun.Quartz.Web.Controllers
                 //throw new ApplicationException("test error");
                 // var dt = conn.QueryTable(sql, null);
                 var dat = conn.Query(sql, null);
+                return dat;
+            }
+        }
+
+
+        /// <summary>
+        /// 获取Mysql数据
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public DataTable GetMysqlData2()
+        {
+            using (var conn = _conns.GetNineSunConn())
+            {
+                var sql = "select * from cod_dw ";
+                //throw new ApplicationException("test error");
+                var dat = conn.QueryTable(sql, null);
+                //var dat = conn.Query(sql, null);
                 return dat;
             }
         }

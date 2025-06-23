@@ -10,6 +10,8 @@ using NLog;
 using NLog.Web;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.HttpLogging;
+using Newtonsoft.Json;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace NineSun.Quartz.Web
 {
@@ -19,15 +21,15 @@ namespace NineSun.Quartz.Web
         {
             var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 
-            //应用程序启动
+            //应用程序启动  
             logger.Info("Application startup");
 
             var builder = WebApplication.CreateBuilder(args);
             var configuration = builder.Configuration;
 
-            //清空日志供应程序，避免.net自带日志输出到命令台
+            //清空日志供应程序，避免.net自带日志输出到命令台  
             builder.Logging.ClearProviders();
-            //使用NLog日志
+            //使用NLog日志  
             builder.Host.UseNLog();
 
             builder.Services.AddHttpLogging(options =>
@@ -36,46 +38,53 @@ namespace NineSun.Quartz.Web
                 options.CombineLogs = true;
             });
 
-          
-            // Add services to the container.
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            // Add services to the container.  
+            builder.Services.AddControllers().AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+            });
 
+            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle  
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "NineSun API", Version = "v1" });
             });
-            //builder.Services.AddQuartzUI();
 
             var optionsBuilder = new DbContextOptionsBuilder<QuarzEFContext>();
             var serverVersion = new MySqlServerVersion(new Version(5, 5, 27));
-            //quartz db
+            //quartz db  
             var dbconfs = configuration.GetSection("DbConfig").Get<List<DbConfigItem>>();
-            
-            //db
+
+            //db  
             optionsBuilder.UseMySql(dbconfs.First(x => x.Key == "quartz").ConnectionString, serverVersion);
             builder.Services.AddQuartzUI(optionsBuilder.Options);
-            builder.Services.AddSingleton(new DatabaseConn(dbconfs));  
+            builder.Services.AddSingleton(new DatabaseConn(dbconfs));
+            //缓存
+            builder.Services.AddSingleton<IMemoryCache,MemoryCache>( sp => new MemoryCache(new MemoryCacheOptions()));
 
             var app = builder.Build();
 
-            //confirm create database
+            // -----------------------------------------------------------------------
+            //confirm create database  
             using (var scope = app.Services.CreateScope())
             {
                 var qctx = scope.ServiceProvider.GetRequiredService<QuarzEFContext>();
                 qctx.Database.EnsureCreated();
             }
 
-            // Configure the HTTP request pipeline.
+            // 启用HTTP请求日志记录  
+            app.UseHttpLogging();
+
+            app.UseStaticFiles();
+
+            // Configure the HTTP request pipeline.  
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
-            // 启用HTTP请求日志记录
-            app.UseHttpLogging();
 
             app.UseAuthorization();
             app.UseQuartzUIBasicAuthorized();
