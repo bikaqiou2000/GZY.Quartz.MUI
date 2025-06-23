@@ -54,7 +54,7 @@ namespace NineSun.Quartz.Web.Controllers
             using (var conn = _conns.GetNineSunConn())
             {
                 var sql = "select * from cod_dw ";
-                throw new ApplicationException("test error");
+                //throw new ApplicationException("test error");
                 // var dt = conn.QueryTable(sql, null);
                 var dat = conn.Query(sql, null);
                 return dat;
