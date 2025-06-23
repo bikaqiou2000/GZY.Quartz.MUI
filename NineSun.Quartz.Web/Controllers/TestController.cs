@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
 using NineSun.Quartz.Web.Domain.DB;
 using Dapper;
+using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.Extensions.Caching.Memory;
+using NineSun.Quartz.Web.Domain.Conf;
 
 namespace NineSun.Quartz.Web.Controllers
 {
@@ -21,11 +24,13 @@ namespace NineSun.Quartz.Web.Controllers
 
         private readonly ILogger<TestController> _logger;
         private readonly DatabaseConn _conns ;
+        private readonly IMemoryCache _cache;
 
-        public TestController(ILogger<TestController> logger, DatabaseConn conns)
+        public TestController(ILogger<TestController> logger, DatabaseConn conns, IMemoryCache cache)
         {
             _logger = logger;
             _conns = conns;
+            _cache = cache;
         }
 
         /// <summary>
@@ -77,6 +82,18 @@ namespace NineSun.Quartz.Web.Controllers
                 //var dat = conn.Query(sql, null);
                 return dat;
             }
+        }
+
+
+        /// <summary>
+        /// 获取code 
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public string GetCode()
+        {
+            var dat = _cache.Get<string>(ChanjetConfig.Code_Key);
+            return dat;
         }
     }
 
